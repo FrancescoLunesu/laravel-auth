@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Post extends Model
 {
 
-    protected $filable = [
+    protected $fillable = [
         'user_id',
         'title',
         'body',
@@ -17,5 +17,9 @@ class Post extends Model
 
     public function user(){
         return $this->belongsTo('App\User');
+    }
+
+    public function tags(){
+        return $this->belongsToMany('App\Tag');
     }
 }

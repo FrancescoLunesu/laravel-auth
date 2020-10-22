@@ -10,21 +10,21 @@
     </div>
 @endif
 <div class="container">
-    <form action="{{ route('posts.store')}}" method="post">
+    <form action="{{ route('posts.update', $post->id)}}" method="post">
         @csrf
-        @method('POST')
+        @method('PATCH')
       <div class="form-group">
         <label for="title">Titolo: </label>
-        <input type="text" class="form-control" name="title" placeholder="Inserisci il titolo:">
+        <input type="text" class="form-control" name="title" value="{{ $post->title }}">
       </div>
       <div class="form-group">
           <label for="body">Body: </label>
-          <textarea class="form-control" name="body" rows="3"></textarea>
+          <textarea class="form-control" name="body" rows="3"> {{ $post->body }} </textarea>
       </div>
       <div class="form-group">
         @foreach ($tags as $tag)
             <label for="tag">{{ $tag->name}}</label>
-            <input type="checkbox" name="tags[]" value="{{$tag->id}}">
+            <input type="checkbox" name="tags[]" value="{{$tag->id}}" {{($post->tags->contains($tag->id) ? 'checked' : '')}}>
         @endforeach
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
