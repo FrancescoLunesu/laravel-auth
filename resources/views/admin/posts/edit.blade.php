@@ -10,9 +10,14 @@
     </div>
 @endif
 <div class="container">
-    <form action="{{ route('posts.update', $post->id)}}" method="post">
+    <form action="{{ route('posts.update', $post->id)}}" method="post" enctype="multipart/form-data">
         @csrf
         @method('PATCH')
+        <img src="{{ asset('storage/'. $post->img) }}" alt=" {{ $post->slug}}" width="380px">
+        <div>
+            <label for="img">Immagine</label>
+            <input type="file" name="img" accept="image/*">
+        </div>
       <div class="form-group">
         <label for="title">Titolo: </label>
         <input type="text" class="form-control" name="title" value="{{ $post->title }}">

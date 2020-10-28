@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Post;
 use App\Tag;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -17,7 +19,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        $posts = Post::where('user_id', Auth::id())->orderBy('created_at', 'desc')->paginate(5);
 
         return view('admin.posts.index', compact('posts'));
         // $posts = Post::all();
@@ -44,17 +46,23 @@ class PostController extends Controller
     public function store(Request $request)
     {
         // mi vado a prendere i dati che mi vengono restituiti sotto forma di array
-
+        $data = $request->all();
         $request->validate(
             [
                 'title'=>'required|min:5|max:100',
-                'body'=>'required|min:5|max:500'
+                'body'=>'required|min:5|max:500',
+                'img' => 'image'
             ]
         );
-        $data = $request->all();
         $data['user_id'] = Auth::id();
         $data['slug'] = Str::slug($data['title'], '-');
+
         $newPost = new Post();
+
+        if(!empty($data['img'])){
+            $data['img'] = Storage::disk('public')->put('images', $data['img']);
+        }
+
         $newPost->fill($data);
 
         $saved = $newPost->save();
@@ -101,11 +109,16 @@ class PostController extends Controller
     {
         $data=$request->all(); // array di dati
         $data['slug'] = Str::slug($data['title'], '-');
+        $data['updated_at'] = Carbon::now('Europe/Rome');
 
         $post->tags()->sync($data['tags']);
 
+        if(!empty($data['img'])){
+            $data['img'] = Storage::disk('public')->put('images', $data['img']);
+        }
+
         $post->update($data);
-        return redirect()->route('posts.index')->with('statusModifica', 'Hai modificato correttamente il tuo post');
+        return redirect()->route('posts.index')->with('status', 'Hai modificato correttamente il tuo post');
     }
 
     /**
@@ -117,6 +130,7 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         $post->delete();
-        return redirect()->route('posts.index')->with('status', 'Hai cancellato correttamente il tuo post');
+        return redirect()->route('posts.index');
+        // ->with('status', 'Hai cancellato correttamente il tuo post');
     }
 }
